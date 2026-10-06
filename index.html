@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+  <title>NOTME — Telegram Mini App</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #172033;
+    }
+
+    .header {
+      padding: 22px 18px;
+      color: white;
+      background: linear-gradient(135deg, #1976ff, #e91e9b);
+      border-radius: 0 0 28px 28px;
+    }
+
+    .brand {
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    .welcome {
+      margin-top: 8px;
+      font-size: 14px;
+      opacity: .9;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 18px;
+    }
+
+    .wallet {
+      margin-top: -5px;
+      padding: 20px;
+      border-radius: 22px;
+      background: white;
+      box-shadow: 0 8px 25px rgba(0,0,0,.08);
+    }
+
+    .wallet-title {
+      color: #687386;
+      font-size: 13px;
+    }
+
+    .balance {
+      margin-top: 7px;
+      font-size: 32px;
+      font-weight: 800;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2,1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .card {
+      padding: 20px 15px;
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.06);
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .card:active {
+      transform: scale(.97);
+    }
+
+    .icon {
+      font-size: 27px;
+    }
+
+    .card h3 {
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    .card p {
+      margin-top: 5px;
+      color: #7b8494;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .section {
+      margin-top: 22px;
+    }
+
+    .section h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .info {
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.05);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .status {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #eef5ff;
+      color: #2469d8;
+      font-size: 12px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 14px;
+      border: 0;
+      border-radius: 13px;
+      padding: 13px;
+      background: linear-gradient(135deg,#1976ff,#e91e9b);
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 25px 10px;
+      color: #929aaa;
+      font-size: 11px;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div class="header">
+    <div class="brand">NOTME</div>
+    <div class="welcome" id="welcome">
+      Telegram Creator & Earning Platform
+    </div>
+  </div>
+
+  <main class="container">
+
+```
+<div class="wallet">
+  <div class="wallet-title">Wallet Balance</div>
+  <div class="balance">₹<span id="balance">0.00</span></div>
+  <button onclick="showWalletMessage()">Wallet</button>
+</div>
+
+<div class="grid">
+
+  <div class="card" onclick="createLink()">
+    <div class="icon">🔗</div>
+    <h3>Create Link</h3>
+    <p>Create your short earning link.</p>
+  </div>
+
+  <div class="card" onclick="showComingSoon('My Links')">
+    <div class="icon">📊</div>
+    <h3>My Links</h3>
+    <p>View your links and clicks.</p>
+  </div>
+
+  <div class="card" onclick="showComingSoon('Withdraw')">
+    <div class="icon">💸</div>
+    <h3>Withdraw</h3>
+    <p>Request your available balance.</p>
+  </div>
+
+  <div class="card" onclick="showComingSoon('Support')">
+    <div class="icon">💬</div>
+    <h3>Support</h3>
+    <p>Contact NOTME support.</p>
+  </div>
+
+</div>
+
+<div class="section">
+  <h2>Account</h2>
+
+  <div class="info">
+    <div><b>Telegram ID:</b> <span id="telegramId">Not available</span></div>
+    <div><b>Name:</b> <span id="telegramName">Guest</span></div>
+    <div class="status" id="status">
+      Waiting for Telegram WebApp...
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  NOTME • Telegram Mini App
+</div>
+```
+
+  </main>
+
+  <script>
+    const tg = window.Telegram && window.Telegram.WebApp
+      ? window.Telegram.WebApp
+      : null;
+
+    function initTelegram() {
+      if (!tg) {
+        document.getElementById("status").textContent =
+          "Open this app inside Telegram to connect your account.";
+        return;
+      }
+
+      tg.ready();
+      tg.expand();
+
+      const user = tg.initDataUnsafe &&
+                   tg.initDataUnsafe.user
+                   ? tg.initDataUnsafe.user
+                   : null;
+
+      if (user) {
+        const fullName =
+          [user.first_name, user.last_name]
+          .filter(Boolean)
+          .join(" ");
+
+        document.getElementById("telegramId").textContent =
+          user.id || "Unknown";
+
+        document.getElementById("telegramName").textContent =
+          fullName || user.username || "Telegram User";
+
+        document.getElementById("welcome").textContent =
+          "Welcome, " + (user.first_name || "User") + " 👋";
+
+        document.getElementById("status").textContent =
+          "Telegram account connected.";
+      } else {
+        document.getElementById("status").textContent =
+          "Telegram user information is unavailable.";
+      }
+    }
+
+    function showWalletMessage() {
+      if (tg) {
+        tg.showAlert(
+          "Wallet system will be connected after Firebase authentication is configured."
+        );
+      } else {
+        alert("Open this page inside Telegram.");
+      }
+    }
+
+    function createLink() {
+      if (tg) {
+        tg.showAlert(
+          "Short-link generator will be connected in the next setup step."
+        );
+      } else {
+        alert("Open this page inside Telegram.");
+      }
+    }
+
+    function showComingSoon(name) {
+      if (tg) {
+        tg.showAlert(name + " will be connected in the next module.");
+      } else {
+        alert(name + " module.");
+      }
+    }
+
+    initTelegram();
+  </script>
+
+</body>
+</html>
